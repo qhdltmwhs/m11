@@ -1,12 +1,21 @@
 import { parseExpiresIn } from '../utils/time.js';
 import type { Secret } from 'jsonwebtoken';
 
+// 필수 환경변수 검증 함수
+const getRequiredEnv = (key: string): string => {
+    const value = process.env[key];
+    if (!value) {
+        throw new Error(`필수 환경변수 ${key}가 설정되지 않았습니다.`);
+    }
+    return value;
+};
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
-// JWT
-const JWT_ACCESS_TOKEN_SECRET: Secret = process.env.JWT_ACCESS_TOKEN_SECRET || 'default_access_secret';
-const JWT_REFRESH_TOKEN_SECRET: Secret = process.env.JWT_REFRESH_TOKEN_SECRET || 'default_refresh_secret';
+// JWT (필수 환경변수)
+const JWT_ACCESS_TOKEN_SECRET: Secret = getRequiredEnv('JWT_ACCESS_TOKEN_SECRET');
+const JWT_REFRESH_TOKEN_SECRET: Secret = getRequiredEnv('JWT_REFRESH_TOKEN_SECRET');
 const JWT_ACCESS_TOKEN_COOKIE_NAME = process.env.JWT_ACCESS_TOKEN_COOKIE_NAME || 'accessToken';
 const JWT_REFRESH_TOKEN_COOKIE_NAME = process.env.JWT_REFRESH_TOKEN_COOKIE_NAME || 'refreshToken';
 const JWT_ACCESS_TOKEN_EXPIRES_IN = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '1h';
