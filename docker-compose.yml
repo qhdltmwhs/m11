@@ -9,12 +9,12 @@ services:
     env_file:
       - .env  
     environment:
-      - NODE_ENV=production
+      # - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/pandamarket?schema=public
-      - JWT_ACCESS_TOKEN_SECRET=${JWT_ACCESS_TOKEN_SECRET}
-      - JWT_REFRESH_TOKEN_SECRET=${JWT_REFRESH_TOKEN_SECRET}
-      - JWT_ACCESS_TOKEN_EXPIRES_IN=1h
-      - JWT_REFRESH_TOKEN_EXPIRES_IN=7d
+      # - JWT_ACCESS_TOKEN_SECRET=${JWT_ACCESS_TOKEN_SECRET}
+      # - JWT_REFRESH_TOKEN_SECRET=${JWT_REFRESH_TOKEN_SECRET}
+      # - JWT_ACCESS_TOKEN_EXPIRES_IN=1h
+      # - JWT_REFRESH_TOKEN_EXPIRES_IN=7d
     volumes:
       - ./uploads:/app/uploads
     depends_on:
