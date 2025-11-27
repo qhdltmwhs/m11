@@ -6,6 +6,8 @@ services:
     container_name: pandamarket-api
     ports:
       - "3000:3000"
+    env_file:
+      - .env  
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/pandamarket?schema=public
