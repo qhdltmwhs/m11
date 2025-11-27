@@ -27,6 +27,9 @@ jobs:
             # Build and start containers
             docker-compose up -d --build
 
+            # Wait for the application container to start
+            sleep 10
+
             # Run database migrations
             docker-compose exec -T app npx prisma migrate deploy
 
