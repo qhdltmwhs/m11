@@ -1,0 +1,34 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/pandamarket
+
+            # Pull latest code
+            git pull origin main
+
+            # Stop existing containers
+            docker-compose down
+
+            # Build and start containers
+            docker-compose up -d --build
+
+            # Run database migrations
+            docker-compose exec -T app npx prisma migrate deploy
+
+            # Show status
+            docker-compose ps
