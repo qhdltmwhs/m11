@@ -2,7 +2,7 @@ name: Deploy to AWS EC2
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
   deploy:
@@ -18,8 +18,10 @@ jobs:
           script: |
             cd ~/pandamarket
 
-            # .env 파일의 내용을 환경 변수로 export
-            set -a; . ./.env; set +a
+            # .env 파일 생성/덮어쓰기
+            cat > .env << 'EOF'
+            ${{ secrets.ENV_FILE }}
+            EOF
 
             # Pull latest code
             git pull origin main
