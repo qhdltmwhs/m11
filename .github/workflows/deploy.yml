@@ -3,10 +3,12 @@ name: Deploy to AWS EC2
 on:
   push:
     branches: [main]
+  workflow_dispatch: # 수동 실행 가능
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # 타임아웃 설정
 
     steps:
       - name: Deploy to EC2
@@ -15,25 +17,59 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m
           script: |
+            set -e  # 에러 발생 시 중단
+            
+            echo "📦 Starting deployment..."
             cd ~/pandamarket
 
             # .env 파일 생성/덮어쓰기
+            echo "🔐 Creating .env file..."
             cat > .env << 'EOF'
             ${{ secrets.ENV_FILE }}
             EOF
 
-            # Pull latest code
+            # .env 파일 검증
+            if ! grep -q "DATABASE_URL" .env; then
+              echo "❌ Error: DATABASE_URL not found in .env"
+              exit 1
+            fi
+
+            # 최신 코드 가져오기
+            echo "🔄 Pulling latest code..."
             git pull origin main
 
-            # Stop existing containers
+            # 기존 컨테이너 중지
+            echo "🛑 Stopping containers..."
             docker-compose down
 
-            # Build and start containers
+            # 이미지 빌드 및 컨테이너 시작
+            echo "🏗️  Building and starting containers..."
             docker-compose up -d --build
 
-            # Run database migrations
+            # 컨테이너 시작 대기
+            echo "⏳ Waiting for containers to be healthy..."
+            sleep 10
+
+            # DB 마이그레이션
+            echo "🗄️  Running database migrations..."
             docker-compose exec -T app npx prisma migrate deploy
 
-            # Show status
+            # 상태 확인
+            echo "✅ Deployment completed!"
+            echo "📊 Container status:"
             docker-compose ps
+
+            # 로그 확인 (최근 10줄)
+            echo "📋 Recent logs:"
+            docker-compose logs --tail=10 app
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Deployment succeeded!"
+          else
+            echo "❌ Deployment failed!"
+          fi
