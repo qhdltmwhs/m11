@@ -18,6 +18,9 @@ jobs:
           script: |
             cd ~/pandamarket
 
+            # .env 파일의 내용을 환경 변수로 export
+            set -a; . ./.env; set +a
+
             # Pull latest code
             git pull origin main
 
